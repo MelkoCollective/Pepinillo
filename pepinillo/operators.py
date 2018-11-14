@@ -60,6 +60,23 @@ class SICPOVMBase(object):
     def measure(self, observable, samples):
         return MeasureObservable(self, observable, samples)
 
+    def rho(self, samples):
+        return DensityMatrix(self, samples)
+
+
+class DensityMatrix(object):
+
+    def __init__(self, povm : SICPOVMBase, samples):
+        self.povm = povm
+        self.samples = samples
+
+    def measure(self, observable):
+        return MeasureObservable(self.povm, observable, self.samples)
+
+    def contract(self, state):
+        # TODO: contraction with tensor network states
+        raise NotImplementedError
+
 
 class MeasureObservable(object):
 
