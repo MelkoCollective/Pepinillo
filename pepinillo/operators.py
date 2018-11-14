@@ -1,4 +1,12 @@
 import numpy as np
+from .mps import MPS
+
+__all__ = [
+    'Pauli',
+    'SICPOVMBase',
+    'Pauli4',
+    'Tetra',
+]
 
 class Pauli:
     I = np.array([[1, 0], [0, 1]], dtype=np.complex128)
@@ -70,8 +78,18 @@ class DensityMatrix(object):
         self.povm = povm
         self.samples = samples
 
-    def measure(self, observable):
-        return MeasureObservable(self.povm, observable, self.samples)
+    def measure(self, *observables):
+        return MeasureObservable(self.povm, observables, self.samples)
+
+    def trace(self, state):
+        if isinstance(state, MPS):
+            self.trace_mps(state)
+        else:
+            raise NotImplementedError
+
+    def trace_mps(self, state):
+        invT = np.linalg.inv(self.overlap_matrix())
+        return        
 
     def contract(self, state):
         # TODO: contraction with tensor network states
@@ -80,17 +98,29 @@ class DensityMatrix(object):
 
 class MeasureObservable(object):
 
-    def __init__(self, povm : SICPOVMBase, observable : np.ndarray, samples):
+    def __init__(self, povm : SICPOVMBase, observables : tuple, samples):
         self.povm = povm
-        self.observable = observable
+        self.observables = observables
         self.samples = samples
 
-    def on(self, *args):
-        U_O = self.povm.contract_observable(self.observable)
+    def on(self, *sites):
+        U_O = dict()
+        for site, observable in zip(sites, self.observables):
+            U_O[site] = self.povm.contract_observable(observable)
+
         U_I = self.povm.contract_identity()
 
+        def contract_local(sample):
+            out = 1.0
+            for i, k in enumerate(sample):
+                if i in U_O.keys():
+                    out = out * U_O[i][k]
+                else:
+                    out = out * U_I[k]
+            return out
+
         # P_{i_1, i_2, ..., i_N} U_{i_1}^1 U_{i_2}^2 ... U_{i_N}^N
-        return np.sum(np.prod([U_O[k] if i in args else U_I[k] for (i, k) in enumerate(samples[0])]) for sample in self.samples) / self.samples.shape[0]
+        return np.sum(contract_local(sample) for sample in self.samples) / self.samples.shape[0]
 
 class Pauli4(SICPOVMBase):
 

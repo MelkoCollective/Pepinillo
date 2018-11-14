@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 from torch.utils.data import Dataset
-from operators import SICPOVMBase
+from .operators import SICPOVMBase
 
 
 class POVMData(Dataset):
@@ -18,7 +18,7 @@ class POVMData(Dataset):
     @staticmethod
     def load_data(filename, npovm):
         # TODO: replace `a` with a more readable name
-        data = np.load(filename)['a']
+        data = np.load(filename)['data']
         # convention
         # 0: number of samples
         # 1: nsites * npovm

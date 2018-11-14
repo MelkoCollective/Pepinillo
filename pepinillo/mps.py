@@ -40,3 +40,6 @@ class MPS(object):
             out = out.reshape(2**(i + 2), out.shape[-2], out.shape[-1])
 
         return out.trace(axis1=1, axis2=2)
+
+    def dump(filename):
+        np.save
