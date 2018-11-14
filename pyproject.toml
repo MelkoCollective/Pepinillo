@@ -8,10 +8,10 @@ license = 'Apache-2.0'
 url = 'https://github.com/PIQuIL/Pepinillo'
 
 [requires]
-python_version = ['3.5', '3.6', 'pypy', 'pypy3']
+python_version = ['3.5', '3.6']
 
 [build-system]
-requires = ['setuptools', 'wheel']
+requires = ['setuptools', 'wheel', 'numpy']
 
 [tool.hatch.commands]
 prerelease = 'hatch build'

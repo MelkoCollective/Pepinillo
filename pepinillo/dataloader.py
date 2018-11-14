@@ -1,0 +1,2 @@
+class POVMData(object):
+    pass
